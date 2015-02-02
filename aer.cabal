@@ -44,6 +44,8 @@ test-suite tests
   hs-source-dirs:      test, src
   build-depends:       base,
                        aer,
+                       vector,
+                       vector-th-unbox,
                        test-framework,
                        test-framework-quickcheck2,
                        test-framework-hunit,

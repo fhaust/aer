@@ -8,8 +8,8 @@ import Control.Applicative
 import Test.QuickCheck
 
 
-import qualified Data.AER.Types as AER
-import qualified Data.AER.DVS   as DVS
+import qualified Data.AER.Types  as AER
+import qualified Data.AER.DVS128 as DVS
 
 import           Data.Thyme.Time
 
@@ -24,6 +24,9 @@ instance Arbitrary DVS.Address where
 
 instance Arbitrary a => Arbitrary (AER.Event a) where
     arbitrary = AER.Event <$> arbitrary <*> arbitraryTimestamp
+
+instance Arbitrary AER.Polarity where
+    arbitrary = (\x -> if x then AER.U else AER.D) <$> arbitrary
 
 
 -- this is necessary because aer only supports word32 timestamps

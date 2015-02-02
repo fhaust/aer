@@ -13,8 +13,8 @@ import Control.Applicative
 
 import Data.Serialize
 
-import qualified Data.AER.Types as AER
-import qualified Data.AER.DVS   as DVS
+import qualified Data.AER.Types  as AER
+import qualified Data.AER.DVS128 as DVS
 import qualified Network.AER.UDP as UDP
 
 import qualified Data.ByteString as B

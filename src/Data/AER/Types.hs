@@ -1,5 +1,8 @@
 
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 module Data.AER.Types where
 
@@ -11,12 +14,15 @@ import           Data.Serialize
 import           Data.Thyme.Clock
 import           Data.Thyme.Time
 
+import qualified Data.Vector.Unboxed as V
+import           Data.Vector.Unboxed.Deriving
+
 import           GHC.Generics
 
 --------------------------------------------------
 -- data types
 
-
+data Polarity = U | D deriving (Show,Read,Eq,Ord,Generic)
 
 data Event a = Event {
     address   :: a,
@@ -41,9 +47,23 @@ instance Serialize a => Serialize (Packet a) where
     put (Packet n es) = put n >> mapM_ put es
 
 --------------------------------------------------
+-- derive Unbox instances
+
+derivingUnbox "Polarity"
+    [t| Polarity -> Bool |]
+    [| \p -> if p == U then True else False |]
+    [| \p -> if p then U else D             |]
+
+derivingUnbox "Event"
+    [t| V.Unbox a => Event a -> (a,NominalDiffTime)  |]
+    [| \(Event a t) -> (a,t) |]
+    [| \(a,t) -> Event a t   |]
+
+--------------------------------------------------
 -- derive NFData instances
 
 instance NFData a => NFData (Event a)
 instance NFData a => NFData (Packet a)
+instance NFData Polarity
 
 
