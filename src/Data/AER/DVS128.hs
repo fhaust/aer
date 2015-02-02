@@ -1,7 +1,7 @@
 
 {-# LANGUAGE DeriveGeneric #-}
 
-module Data.AER.DVS where
+module Data.AER.DVS128 where
 
 import Control.DeepSeq
 import Control.Applicative

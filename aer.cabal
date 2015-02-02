@@ -17,7 +17,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Data.AER.Types,
-                       Data.AER.DVS,
+                       Data.AER.DVS128,
                        Data.AER.Tmpdiff128StereoPair,
                        Data.AER.AEDat,
                        Data.Word7
