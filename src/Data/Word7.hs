@@ -11,12 +11,12 @@ import Data.Word
 import Data.Bits
 import Data.Serialize
 
-import qualified Data.Vector.Unboxed as UV
+{-import qualified Data.Vector.Unboxed as UV-}
 import qualified Data.Vector.Unboxed.Deriving as UV
 
 
 import Control.DeepSeq
-import Control.Applicative
+{-import Control.Applicative-}
 
 import Text.Read
 

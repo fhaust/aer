@@ -12,20 +12,21 @@ module Data.AER.DVS128
   , writeDVSData
   ) where
 
-import Control.DeepSeq
-import Control.Applicative
+import           Control.DeepSeq
 
-import Data.Word
-import Data.Word7
-import Data.Bits
-import Data.Serialize
+import           Data.Word
+import           Data.Word7
+import           Data.Bits
+import           Data.Serialize
 
-import GHC.Generics
+import           GHC.Generics
 
 import           Data.AER.Types
 import qualified Data.AER.AEDat as AER
 
-import           Data.Vector.Unboxed.Deriving
+import           Data.Vector.Unboxed.Deriving (derivingUnbox)
+
+import           Data.Thyme.Clock
 
 -- | DVS address data as provided by the DVS cameras
 data Address = Address {
@@ -40,6 +41,7 @@ derivingUnbox "Address"
     [| \(p,x,y)         -> Address p x y  |]
 
 -- | retype event for convenience
+qview :: Event Address -> (Polarity, Word7, Word7, NominalDiffTime)
 qview (Event (Address p x y) t) = (p,x,y,t)
 
 -- | DVS addresses are encoded in one Word32

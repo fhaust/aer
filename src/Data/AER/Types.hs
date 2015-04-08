@@ -2,6 +2,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 
 module Data.AER.Types where
@@ -50,14 +51,14 @@ instance Serialize a => Serialize (Packet a) where
 -- derive Unbox instances
 
 derivingUnbox "Polarity"
-    [t| Polarity -> Bool |]
-    [| \p -> if p == U then True else False |]
-    [| \p -> if p then U else D             |]
+    [t| Polarity -> Bool         |]
+    [| (== U)                    |]
+    [| \p -> if p then U else D  |]
 
 derivingUnbox "Event"
-    [t| V.Unbox a => Event a -> (a,NominalDiffTime)  |]
+    [t| forall a. V.Unbox a => Event a -> (a,NominalDiffTime)  |]
     [| \(Event a t) -> (a,t) |]
-    [| \(a,t) -> Event a t   |]
+    [| (uncurry Event) |]
 
 --------------------------------------------------
 -- derive NFData instances

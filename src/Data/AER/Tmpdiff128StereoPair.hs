@@ -6,23 +6,24 @@
 
 module Data.AER.Tmpdiff128StereoPair where
 
-import Control.DeepSeq
-import Control.Applicative
+import           Control.DeepSeq
 
-import Data.Word
-import Data.Word7
-import Data.Bits
-import Data.Serialize
+import           Data.Word
+import           Data.Word7
+import           Data.Bits
+import           Data.Serialize
 
-import GHC.Generics
+import           GHC.Generics
 
 import qualified Data.AER.Types as AER
 import qualified Data.AER.AEDat as AER
 
 import           Data.Vector.Unboxed.Deriving
 
+import           Data.Thyme.Clock (NominalDiffTime)
+
 -- | Stereo Setup has two cameras: left and right
-data Camera = L | R deriving (Show,Read,Eq)
+data Camera = L | R deriving (Show,Read,Eq,Generic)
 
 {--- | Events have to polarities: up and down-}
 {-data Polarity = U | D deriving (Show,Read,Eq)-}
@@ -42,10 +43,11 @@ derivingUnbox "Address"
 
 derivingUnbox "Camera"
     [t| Camera -> Bool |]
-    [| \p -> if p == L then True else False |]
+    [| (== L) |]
     [| \p -> if p then L else R             |]
 
 -- | retype event for convenience
+qview :: AER.Event Address -> (AER.Polarity, Word7, Word7, Camera, NominalDiffTime)
 qview (AER.Event (Address p x y c) t) = (p,x,y,c,t)
 
 -- | DVS addresses are encoded in one Word32
@@ -55,12 +57,10 @@ instance Serialize Address where
 
 decodeAddress :: Word32 -> Address
 decodeAddress w = Address p x y c
-    where p = case testBit w 0 of False -> AER.D
-                                  True  -> AER.U
+    where p = if testBit w 0 then AER.D else AER.U
           x = fromIntegral $ (w `shiftR` 1) .&. 0x7f
           y = fromIntegral $ (w `shiftR` 8) .&. 0x7f
-          c = case testBit w 15 of False -> L
-                                   True  -> R
+          c = if testBit w 15 then L else R
 
 encodeAddress :: Address -> Word32
 encodeAddress (Address p x y c) = bp .|. bx .|. by .|. bc
@@ -73,6 +73,7 @@ encodeAddress (Address p x y c) = bp .|. bx .|. by .|. bc
 
 -- | NFData is derived
 instance NFData Address
+instance NFData Camera
 
 
 readStereoData :: FilePath -> IO (Either String [AER.Event Address])
