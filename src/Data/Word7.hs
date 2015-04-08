@@ -21,7 +21,7 @@ import Control.Applicative
 import Text.Read
 
 -- | a 7 bit word, used in the dvs address representation
-newtype Word7 = Word7 Word8
+newtype Word7 = Word7 { unWord7 :: Word8 }
     deriving (Enum, Eq, Integral, Num, Ord, Real, NFData, Bits, Serialize, FiniteBits)
 
 
