@@ -20,8 +20,9 @@ library
                        Data.AER.DVS128,
                        Data.AER.Tmpdiff128StereoPair,
                        Data.AER.AEDat,
+                       Data.AER.TimeFront,
                        Data.Word7
-  -- other-modules:       
+  -- other-modules:
   other-extensions:    DeriveGeneric
   build-depends:       base            >=4.7  && <4.9,
                        network         >=2.6  && <2.7,
