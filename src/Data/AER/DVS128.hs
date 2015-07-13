@@ -9,6 +9,7 @@ module Data.AER.DVS128
   , Address(..)
   , qview
   , readDVSData
+  , mmapDVSData
   , writeDVSData
   ) where
 
@@ -25,8 +26,12 @@ import           Data.AER.Types
 import qualified Data.AER.AEDat as AER
 
 import           Data.Vector.Unboxed.Deriving (derivingUnbox)
+import qualified Data.Vector.Storable as S
 
 import           Data.Thyme.Clock
+
+import           Foreign.Storable
+import           Data.Storable.Endian
 
 -- | DVS address data as provided by the DVS cameras
 data Address = Address {
@@ -39,6 +44,14 @@ derivingUnbox "Address"
     [t| Address -> (Polarity,Word7,Word7) |]
     [| \(Address p x y) -> (p,x,y)        |]
     [| \(p,x,y)         -> Address p x y  |]
+
+instance Storable Address where
+    sizeOf    _ = 4
+    alignment _ = 4
+    peek addr   = do
+      (BE w) <- peekByteOff addr 0 :: IO (BigEndian Word32)
+      return $ decodeAddress w
+    poke addr a = pokeByteOff addr 0 (BE $ encodeAddress a)
 
 -- | retype event for convenience
 qview :: Event Address -> (Polarity, Word7, Word7, NominalDiffTime)
@@ -67,6 +80,9 @@ instance NFData Address
 
 readDVSData :: FilePath -> IO (Either String [Event Address])
 readDVSData = AER.readAERData
+
+mmapDVSData :: FilePath -> IO (S.Vector (Event Address))
+mmapDVSData = AER.mmapAERData
 
 writeDVSData :: FilePath -> [Event Address] -> IO ()
 writeDVSData = AER.writeAERData

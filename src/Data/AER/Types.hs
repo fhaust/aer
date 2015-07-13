@@ -14,11 +14,14 @@ import           Data.Word
 import           Data.Serialize
 import           Data.Thyme.Clock
 import           Data.Thyme.Time
+import           Data.Storable.Endian
 
 import qualified Data.Vector.Unboxed as V
 import           Data.Vector.Unboxed.Deriving
 
 import           GHC.Generics
+
+import           Foreign.Storable
 
 --------------------------------------------------
 -- data types
@@ -46,6 +49,22 @@ instance Serialize a => Serialize (Event a) where
 instance Serialize a => Serialize (Packet a) where
     get = Packet <$> get <*> many get
     put (Packet n es) = put n >> mapM_ put es
+
+
+--------------------------------------------------
+-- Foreign instances
+
+instance Storable a => Storable (Event a) where
+    sizeOf _ = 8 -- 4 bytes address + 4 bytes timestamp
+    alignment _ = 4
+    peekByteOff addr off = do
+      a <- peekByteOff addr off
+      (BE t) <- peekByteOff addr (off + 4) :: IO (BigEndian Word32)
+      return $ Event a (fromMicroseconds . fromIntegral $ t)
+    pokeByteOff addr off (Event a ts) = do
+      pokeByteOff addr off a 
+      pokeByteOff addr (off + 4) (BE . fromIntegral . toMicroseconds $ ts :: BigEndian Word32)
+
 
 --------------------------------------------------
 -- derive Unbox instances

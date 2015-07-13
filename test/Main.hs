@@ -20,6 +20,8 @@ import qualified Network.AER.UDP as UDP
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as B8
 
+import qualified Data.Vector.Storable as S
+
 import Arbitraries()
 
 
@@ -34,6 +36,7 @@ tests = [ testGroup "DVS tests"
           , testProperty "dvs codec" propDvsCodec
           , testProperty "aer packet codec" propAerPacketCodec
           , testCase     "dvs aerdat io" testDvsDatIO
+          , testCase     "dvs mmapped io" testDvsDatMMappedIO 
           {-, testCase     "aer over udp" testAEROverUDP-}
           ]
         ]
@@ -56,6 +59,25 @@ testDvsDatIO = do
 
     -- rewrite the data
     DVS.writeDVSData testFile es
+    {-let t = readTime defaultTimeLocale "%a %b %d %H:%M:%S %Z %Y" "Tue Sep 16 15:49:51 CEST 2014"-}
+    {-AER.writeAERData' "test-output.aedat" t es-}
+
+    -- compare the files
+    originalData <- dropLinesWhile ((== '#') . B8.head) <$> B.readFile sampleFile
+    testData     <- dropLinesWhile ((== '#') . B8.head) <$> B.readFile testFile
+
+    assertBool "aedat filewriting and reading does not work" (originalData == testData)
+
+testDvsDatMMappedIO :: Assertion
+testDvsDatMMappedIO = do
+
+    let sampleFile = "data/DVS128-2014-09-16T15-49-51+0200-20000-0.aedat"
+        testFile   = "data/test-output.aedat"
+
+    es <- DVS.mmapDVSData sampleFile
+
+    -- rewrite the data
+    DVS.writeDVSData testFile (S.toList es)
     {-let t = readTime defaultTimeLocale "%a %b %d %H:%M:%S %Z %Y" "Tue Sep 16 15:49:51 CEST 2014"-}
     {-AER.writeAERData' "test-output.aedat" t es-}
 
