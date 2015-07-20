@@ -9,6 +9,7 @@ import           Control.Applicative
 
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Unsafe as B
+import qualified Data.ByteString.Internal as B
 import qualified Data.ByteString.Char8 as B8
 
 import qualified Data.Vector.Storable as S
@@ -41,10 +42,12 @@ mmapAERData name = do
     bs <- dropHeader <$> mmapFileByteString name Nothing
     -- some conversion is necessary to get the 'ForeignPtr' from
     -- a 'ByteString'
-    B.unsafeUseAsCString bs $ \ptr -> do
-      fptr <- newForeignPtr_ ptr
-      let count = B.length bs `div` 8 -- sizeof one event
-      return $ S.unsafeFromForeignPtr0 (castForeignPtr fptr) count
+    let (fptr,offset,len) = B.toForeignPtr bs
+    putStrLn $ "ptr   : " ++ show fptr
+    putStrLn $ "offset: " ++ show offset 
+    putStrLn $ "len   : " ++ show len
+    let count = len `div` 8 -- sizeof one event
+    return $ S.unsafeFromForeignPtr0 (castForeignPtr fptr) count
 
 
 -- | drop the first lines that contain the AER header
