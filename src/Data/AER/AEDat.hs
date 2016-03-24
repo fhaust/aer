@@ -1,5 +1,7 @@
 
 
+-- reference: http://sourceforge.net/p/jaer/wiki/Interfacing%20to%20jAER/
+
 {-# LANGUAGE OverloadedStrings #-}
 
 module Data.AER.AEDat where
